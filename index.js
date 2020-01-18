@@ -66,10 +66,12 @@ function byManager(){
 
 function add(){
   function roleChoice(dept, employee){
+    let multiplier = 0;
     let roleArr = [];
     for(i = 0; i < depts.length; i++){
       if(dept === depts[i].name){
         roleArr = depts[i].roles;
+        multiplier = i;
       }
     }
     inquirer.prompt([
@@ -78,8 +80,16 @@ function add(){
       choices: roleArr,
       message: "What Is The Employee's Role?"}
     ]).then(function(data){
-      employee.role_id = roleArr.indexOf(data.role)+1;
-      console.log(employee);
+      employee.role_id = (roleArr.indexOf(data.role)+1) + (multiplier * 3);
+      // connection.query(
+      //   "insert into employee set ?",
+      //   employee,
+      //   function(err, res) {
+      //     if (err) throw err;
+      //     console.log(res.affectedRows + " employee added!\n");
+      //     exitApp();
+      //   }
+      // );
       startPrompt();
     })
   }
