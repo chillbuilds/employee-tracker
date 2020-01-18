@@ -1,6 +1,6 @@
 const inquirer = require('inquirer');
 const mysql = require('mysql');
-// const consoleNPM = require('console.table');
+const table = require('console.table');
 const depts = [
   {name: 'Couch Testing', roles: ['Stain Removal Expert', 'Pillow Dude', 'Cusion King']},
   {name: 'Snack Eating', roles: ['Cheese Melter', 'Dip Wrangler', 'EMT']},
@@ -53,7 +53,18 @@ inquirer.prompt ([
 })}
 
 function view(){
-    
+  let query =
+  "select e.id, e.first_name, e.last_name, r.title, r.salary, d.department from employee e INNER JOIN roles r on e.role_id = r.id inner join department d on r.department_id = d.id";
+connection.query(query, function(err, res) {
+  if (err) throw err;
+  if (res.length == 0) {
+    console.log("\nNo Data Stored In The Emplyee Database\n");
+    setTimeout(function(){add();}, 1000);
+  }else{
+  console.log(`\n${res.length} Employees Found\n`);
+  console.table(res);
+  startPrompt();}
+});
 }
 
 function byDept(){
@@ -95,7 +106,7 @@ function add(){
    inquirer.prompt ([
       {type: "input",
        name: "employee_name",
-       message: "Enter Employee's First And Last Name"},
+       message: "Enter Employee's First And Last Name: "},
       {type: "list",
       name: "dept", 
       choices: ['Couch Testing', 'Snack Eating', 'Space Force'],
@@ -117,18 +128,18 @@ connection.query(queryString, function(err, res) {
       name: "remove",
       type: "list",
       choices: function() {
-        let employees = [];
+        let employeeArr = [];
         for (let i = 0; i < res.length; i++) {
-          employees.push(res[i].first_name);
+          employeeArr.push(`${res[i].first_name} ${res[i].last_name}`);
         }
-        return employees;
+        return employeeArr;
       },
       message: "Choose Employee To Remove: "
     })
     .then(function(answers) {
       let employeeId;
       for (let j = 0; j < res.length; j++) {
-        if (res[j].first_name === answers.remove) {
+        if (`${res[j].first_name} ${res[j].last_name}` === answers.remove) {
           employeeId = res[j].empID;
         }
       }
@@ -139,7 +150,7 @@ connection.query(queryString, function(err, res) {
         },
         function(err, res) {
           if (err) throw err;
-          console.log(`\n\n${res.affectedRows} employee removed!\n\n`);
+          console.log(`\n${answers.remove} Removed\n`);
           startPrompt();
         }
       );

@@ -1,7 +1,7 @@
   
-INSERT INTO department (name) VALUES ('Couch Testing');
-INSERT INTO department (name) VALUES ('Snack Eating');
-INSERT INTO department (name) VALUES ('Space Force');
+INSERT INTO department (department) VALUES ('Couch Testing');
+INSERT INTO department (department) VALUES ('Snack Eating');
+INSERT INTO department (department) VALUES ('Space Force');
 
 INSERT INTO roles (title, salary, department_id) VALUES ('Stain Removal Expert', 45000, 1);
 INSERT INTO roles (title, salary, department_id) VALUES ('Pillow Dude', 75000, 1);
