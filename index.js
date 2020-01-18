@@ -11,7 +11,7 @@ var connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
     user: "root",
-    password: "6Bamboozle!",
+    password: "",
     database: "employee_db"
   });
   
@@ -61,7 +61,6 @@ connection.query(query, function(err, res) {
     console.log("\nNo Data Stored In The Emplyee Database\n");
     setTimeout(function(){add();}, 1000);
   }else{
-  console.log(`\n${res.length} Employees Found\n`);
   console.table(res);
   startPrompt();}
 });
@@ -97,7 +96,7 @@ function add(){
         employee,
         function(err, res) {
           if (err) throw err;
-          console.log(`\n${res.affectedRows} employee added!\n`);
+          console.log(`\n${employee.first_name} ${employee.last_name} Added To Employee Database\n`);
           startPrompt();
         }
       );
@@ -150,7 +149,7 @@ connection.query(queryString, function(err, res) {
         },
         function(err, res) {
           if (err) throw err;
-          console.log(`\n${answers.remove} Removed\n`);
+          console.log(`\n${answers.remove} Removed From Employee Database\n`);
           startPrompt();
         }
       );
