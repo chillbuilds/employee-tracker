@@ -81,16 +81,15 @@ function add(){
       message: "What Is The Employee's Role?"}
     ]).then(function(data){
       employee.role_id = (roleArr.indexOf(data.role)+1) + (multiplier * 3);
-      // connection.query(
-      //   "insert into employee set ?",
-      //   employee,
-      //   function(err, res) {
-      //     if (err) throw err;
-      //     console.log(res.affectedRows + " employee added!\n");
-      //     exitApp();
-      //   }
-      // );
-      startPrompt();
+      connection.query(
+        "insert into employee set ?",
+        employee,
+        function(err, res) {
+          if (err) throw err;
+          console.log(`\n${res.affectedRows} employee added!\n`);
+          startPrompt();
+        }
+      );
     })
   }
    inquirer.prompt ([
@@ -109,7 +108,43 @@ function add(){
 }
 
 function remove(){
-
+  let queryString =
+  "SELECT e.first_name, e.last_name, e.id AS empID FROM employee e";
+connection.query(queryString, function(err, res) {
+  if (err) throw err;
+  inquirer
+    .prompt({
+      name: "remove",
+      type: "list",
+      choices: function() {
+        let employees = [];
+        for (let i = 0; i < res.length; i++) {
+          employees.push(res[i].first_name);
+        }
+        return employees;
+      },
+      message: "Choose Employee To Remove: "
+    })
+    .then(function(answers) {
+      let employeeId;
+      for (let j = 0; j < res.length; j++) {
+        if (res[j].first_name === answers.remove) {
+          employeeId = res[j].empID;
+        }
+      }
+      connection.query(
+        "DELETE FROM employee WHERE ?",
+        {
+          id: employeeId
+        },
+        function(err, res) {
+          if (err) throw err;
+          console.log(`\n\n${res.affectedRows} employee removed!\n\n`);
+          startPrompt();
+        }
+      );
+    });
+});
 }
 
 function updateRole(){
