@@ -6,7 +6,7 @@ var connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
     user: "root",
-    password: "",
+    password: "6Bamboozle!",
     database: "employee_db"
   });
   
@@ -116,7 +116,7 @@ function addDept(){
   inquirer.prompt (
     {name: "newDept",
     type: "input",
-    message: "Enter The Department To Store In The Database: "}
+    message: "Enter The Department You Want To Add: "}
   ).then(function(data){
     connection.query(`insert into department (department) values ('${data.newDept}')`, function(){
       console.log(`\n${data.newDept} Added To Departments\n`)
@@ -126,7 +126,37 @@ function addDept(){
 }
 
 function addRole(){
-  startPrompt();
+  let query = "select * from department";
+connection.query(query, function(err, res) {
+  if (err) {};
+      let departmentArr = [];
+      let departmentID;
+    for(i = 0; i < res.length; i++){
+      departmentArr.push(res[i].department);}
+    inquirer.prompt([
+      {name: "title",
+      type: "input",
+      message: "Enter Role You Want To Add: "},
+      {name: "department",
+      type: "list",
+      choices: departmentArr,
+      message: "Choose A Department"},
+      {name: "salary",
+      type: "number", 
+      message: "Enter Salary: "}
+    ]).then(function(data){
+      for(i = 0; i < departmentArr.length; i++){
+        if(departmentArr[i] === data.department){
+          departmentID = i + 1;
+        }
+      }
+      connection.query(`insert into roles (title, salary, department_id) values ('${data.title}', '${data.salary}', ${departmentID})`,
+      function(err){
+        if(err)throw err;
+        startPrompt();
+      })
+    })
+  })
 }
 
 function addEmployee(){
@@ -257,8 +287,7 @@ function removeDept() {
               console.log(`\n${data.dept} Department Removed From Database\n`);
               startPrompt();})
           })
-        })
-      }
+        })}
       })
       startPrompt();
     }else{startPrompt();};
