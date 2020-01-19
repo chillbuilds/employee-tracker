@@ -6,7 +6,7 @@ var connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
     user: "root",
-    password: "6Bamboozle!",
+    password: "",
     database: "employee_db"
   });
   
@@ -65,9 +65,9 @@ inquirer.prompt ([
 
 function viewDepts(){
   let query =
-  "select d.id, d.department from department d";
+  "select * from department";
 connection.query(query, function(err, res) {
-  if (err) throw err;
+  if (err) {};
   if (res.length == 0) {
     console.log("\nNo Departments Stored In The Database\n");
     setTimeout(function(){addDept();}, 1000);
@@ -80,7 +80,7 @@ connection.query(query, function(err, res) {
 
 function viewRoles (){
   let query =
-  "select r.id, r.title, r.salary from roles r";
+  "select * from roles r inner join department d on r.department_id = d.id";
 connection.query(query, function(err, res) {
   if (err) throw err;
   if (res.length == 0) {
@@ -91,14 +91,13 @@ connection.query(query, function(err, res) {
   console.table(res);
   startPrompt();}
 });
-  startPrompt();
 }
 
 function viewEmployees(){
   let query =
   "select e.id, e.first_name, e.last_name, r.title, r.salary, d.department from employee e INNER JOIN roles r on e.role_id = r.id inner join department d on r.department_id = d.id";
 connection.query(query, function(err, res) {
-  if (err) throw err;
+  if (err) {};
   if (res.length == 0) {
     console.log("\nNo Employees Stored In The Database\n");
     setTimeout(function(){addEmployee();}, 1000);
@@ -123,7 +122,7 @@ function addRole(){
 
 function addEmployee(){
   let roles = [];
-  let queryString = "SELECT r.id AS roleId, r.title FROM roles r";
+  let queryString = "SELECT title from roles";
   connection.query(queryString, function(err, res) {
     for (i = 0; i < res.length; i++) {
       roles.push(res[i].title);}
@@ -159,8 +158,7 @@ function addEmployee(){
      roleChoice(employee);
    })
 }
-
-
+ 
 function updateRole(){
   let employees = [];
   let queryString = "SELECT * FROM roles r, employee e WHERE r.id = e.role_id";
@@ -212,12 +210,92 @@ function updateRole(){
 }
 
 function removeDept() {
-  startPrompt();
+  let depts = [];
+  let deptID;
+  let queryString =
+  "SELECT * FROM department";
+  connection.query(queryString, function(err, res) {
+    for(i = 0; i < res.length; i++){
+      depts.push(res[i].department);}
+    inquirer.prompt([
+      {name: "dept",
+      type: "list",
+      choices: depts,
+      message: "Which Department Would You Like To Remove?"},
+      {name: "confirm",
+      type: "confirm",
+      message: "This Will Delete Any Roles And Employees Associated With This Department\nAre You Sure?"}
+    ]).then(function(data){
+      if(data.confirm === true){
+      let deleteDept;
+      for(i = 0; i < depts.length; i++){
+        if(depts[i] === data.dept){
+          deleteDept = depts[i];
+          deptID = i + 1;
+        }
+      }
+      connection.query("select * from roles where ?", {department_id: deptID}, function(err, res){
+        if(err) {};
+        for(i = 0; i < res.length; i++){
+        connection.query("DELETE FROM employee WHERE ?", {role_id: res[i].id}, function(){
+          if(err){};
+          connection.query("DELETE FROM roles WHERE ?",{department_id: deptID}, 
+          function(err, res){
+            if (err) {};
+            connection.query("DELETE FROM department WHERE ?",{department: deleteDept},
+            function(err, res) {
+              if (err) {};
+              console.log(`\n${data.dept} Department Removed From Database\n`);
+              startPrompt();})
+          })
+        })
+      }
+      })
+      startPrompt();
+    }else{startPrompt();};
+    })
+  })
 }
 
 function removeRole() {
-  startPrompt();
-
+  let roles = [];
+  let queryString =
+  "SELECT * FROM roles";
+  connection.query(queryString, function(err, res) {
+    for(i = 0; i < res.length; i++){
+      roles.push(res[i].title);
+    }
+    inquirer.prompt([
+      {name: "role",
+      type: "list",
+      choices: roles,
+      message: "Which Role Would You Like To Remove?"},
+      {name: "confirm",
+      type: "confirm",
+      message: "This Will Remove All Employees Associated With This Role\nAre You Sure?"}
+    ]).then(function(data){
+      if(data.confirm === true){
+        connection.query("select * from roles where ?", {title: data.role}, function(err, res){
+          if(err) {};
+          for(i = 0; i < res.length; i++){
+          connection.query("DELETE FROM employee WHERE ?", {role_id: res[i].id}, function(){
+            if(err){};
+            let deleteRole;
+            for(i = 0; i < roles.length; i++){
+              if(roles[i] === data.role){
+                deleteRole = roles[i];
+              }
+            }
+            connection.query("DELETE FROM roles WHERE ?",{title: deleteRole},
+            function(err, res) {
+              if (err) throw err;
+              console.log(`\n${data.role} Removed From Database\n`);
+              startPrompt();})
+          })}
+          })
+      }else{startPrompt();}
+    })
+  })
 }
 
 function removeEmployee(){
