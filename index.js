@@ -4,14 +4,14 @@ const table = require('console.table');
 const depts = [
   {name: 'Couch Testing', roles: ['Stain Removal Expert', 'Pillow Dude', 'Cusion King']},
   {name: 'Snack Eating', roles: ['Cheese Melter', 'Dip Wrangler', 'EMT']},
-  {name: 'Space Force', roles: ['Freeze Dried Ice Cream Truck Driver', 'Space Janitor', 'Guy That does *pew* *pew* sounds']}
+  {name: 'Space Force', roles: ['Freeze Dried Ice Cream Truck Driver', 'Space Janitor', 'Guy That Does *Pew* *Pew* Sounds']}
 ]
 
 var connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
     user: "root",
-    password: "",
+    password: "6Bamboozle!",
     database: "employee_db"
   });
   
@@ -24,7 +24,7 @@ function startPrompt(){
 inquirer.prompt ([
     {type: "list",
     name: "choice",
-    choices: ["View Employees", "View Employees By Department", "View Employees By Manager", "Add Employee", "Remove Employee", "Update Role", "Update Manager"],
+    choices: ["View Employees", "View Employees By Department", "View Employees By Manager", "Add Employee", "Remove Employee", "Update Role", "Update Manager", "Exit Application"],
     message: "What would you like to do?"}
 ]).then(function(data){
     switch(data.choice) {
@@ -48,6 +48,9 @@ inquirer.prompt ([
           break;
         case "Update Manager":
           updateManager();
+          break;
+        case "Exit Application":
+          connection.end();
           break;
       }
 })}
@@ -122,8 +125,7 @@ function remove(){
   "SELECT e.first_name, e.last_name, e.id AS empID FROM employee e";
 connection.query(queryString, function(err, res) {
   if (err) throw err;
-  inquirer
-    .prompt({
+  inquirer.prompt({
       name: "remove",
       type: "list",
       choices: function() {
@@ -142,11 +144,7 @@ connection.query(queryString, function(err, res) {
           employeeId = res[j].empID;
         }
       }
-      connection.query(
-        "DELETE FROM employee WHERE ?",
-        {
-          id: employeeId
-        },
+      connection.query("DELETE FROM employee WHERE ?",{id: employeeId},
         function(err, res) {
           if (err) throw err;
           console.log(`\n${answers.remove} Removed From Employee Database\n`);
@@ -158,7 +156,56 @@ connection.query(queryString, function(err, res) {
 }
 
 function updateRole(){
+  let employees = [];
+  let roles = [];
+    for (i = 0; i < depts.length; i++) {
+      for(j = 0; j < depts[i].roles.length; j++){
+        roles.push(depts[i].roles[j]);
+        }}
+  let queryString = "SELECT * FROM roles r, employee e WHERE r.id = e.role_id";
+  connection.query(queryString, function(err, res) {
+    if (err) throw err;
+      for (let i = 0; i < res.length; i++) {
+        employees.push(res[i].first_name + " " + res[i].last_name);
+    }
+    inquirer.prompt([
+        {name: "employeeName",
+          type: "list",
+          message: "Choose Employee to Edit",
+          choices: employees
+        },
+        {
+          name: "roleChoice",
+          type: "list",
+          message: `Choose New Role`,
+          choices: roles
+        }
+      ])
+      .then(function(data) {
+        let newRole;
+        for(i = 0; i < roles.length; i++){
+          if(roles[i] === data.roleChoice){
+            newRole = i + 1;
+          }
+        }
+        let updateNameArr = data.employeeName.split(" ");
+        let first = updateNameArr[0];
+        let last = updateNameArr[1];
+        let employee = [{role_id: newRole},{first_name: first},{last_name: last}]
+        let query = "UPDATE employee SET ? WHERE ? AND ?";
+        connection.query(query, employee,
+          function(err, res) {
+            if (err) throw err;
+            // console.log(`\n${first} ${last}'s Role Updated To ${data.roleChoice}\n`);
+            console.log(res)
+            view();
+            connection.end();
 
+            // startPrompt();
+          }
+        );
+      });
+  });
 }
 
 function updateManager(){
