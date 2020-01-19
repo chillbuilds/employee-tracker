@@ -113,7 +113,16 @@ function viewByManager(){
 }
 
 function addDept(){
-  startPrompt();
+  inquirer.prompt (
+    {name: "newDept",
+    type: "input",
+    message: "Enter The Department To Store In The Database: "}
+  ).then(function(data){
+    connection.query(`insert into department (department) values ('${data.newDept}')`, function(){
+      console.log(`\n${data.newDept} Added To Departments\n`)
+      startPrompt();
+    })
+  })
 }
 
 function addRole(){
