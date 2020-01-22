@@ -1,5 +1,5 @@
 {
-  "name": "burger-thing",
+  "name": "employee-tracker",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -8,15 +8,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/heliumface770/burger-thing.git"
+    "url": "git+https://github.com/heliumface770/employee-tracker.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/heliumface770/burger-thing/issues"
+    "url": "https://github.com/heliumface770/employee-tracker/issues"
   },
-  "homepage": "https://github.com/heliumface770/burger-thing#readme",
+  "homepage": "https://github.com/heliumface770/employee-tracker#readme",
   "dependencies": {
     "console.table": "^0.10.0",
     "inquirer": "^7.0.3",
