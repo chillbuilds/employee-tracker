@@ -6,7 +6,7 @@ var connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
     user: "root",
-    password: "6Bamboozle!",
+    password: "",
     database: "employee_db"
   });
   
@@ -20,7 +20,7 @@ inquirer.prompt ([
     {type: "list",
     name: "choice",
     choices: ["View Departments", "View Roles", "View Employees", "View Employees By Manager",
-  "Add Department", "Add Role", "Add Employee", "Edit Employee Role", "Remove Department", "Remove Role", "Remove Employee", "Exit Application"],
+  "Add Department", "Add Role", "Add Employee", "Edit Employee Role", "Salary Analysis By Department", "Remove Department", "Remove Role", "Remove Employee", "Exit Application"],
     message: "What would you like to do?"}
 ]).then(function(data){
     switch(data.choice) {
@@ -193,8 +193,12 @@ function addEmployee(){
        message: "Enter Employee's First And Last Name: "}
    ).then(function(data){
      let nameArr = data.employee_name.split(" ");
+     if(nameArr.length !== 2){
+      console.log("\nInvalid Format\n\nPlease Enter First And Last Name, Separated By A Space\n");
+      setTimeout(function(){addEmployee();}, 1000);
+     }else{
      let employee = {first_name: nameArr[0], last_name: nameArr[1]};
-     roleChoice(employee);
+     roleChoice(employee);}
    })
 }
  
@@ -206,6 +210,10 @@ function updateRole(){
     for (let i = 0; i < res.length; i++) {
       employees.push(res[i].first_name + " " + res[i].last_name);
     }
+    if (employees.length == 0) {
+      console.log("\nNo Employees Stored In The Database\n");
+      setTimeout(function(){addEmployee();}, 1000);
+    }else{
     let roles = [];
     let queryString = "SELECT r.id AS roleId, r.title FROM roles r";
     connection.query(queryString, function(err, res) {
@@ -244,7 +252,7 @@ function updateRole(){
             startPrompt();
           }
         );
-      });
+      });}
   });
 }
 
