@@ -6,7 +6,7 @@ var connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
     user: "root",
-    password: "",
+    password: "6Bamboozle!",
     database: "employee_db"
   });
   
@@ -19,8 +19,8 @@ function startPrompt(){
 inquirer.prompt ([
     {type: "list",
     name: "choice",
-    choices: ["View Departments", "View Roles", "View Employees", "View Employees By Manager",
-  "Add Department", "Add Role", "Add Employee", "Edit Employee Role", "Salary Analysis By Department", "Remove Department", "Remove Role", "Remove Employee", "Exit Application"],
+    choices: ["View Departments", "View Roles", "View Employees", 
+    "Add Department", "Add Role", "Add Employee", "Edit Employee Role", "Remove Department", "Remove Role", "Remove Employee", "Exit Application"],
     message: "What would you like to do?"}
 ]).then(function(data){
     switch(data.choice) {
@@ -32,9 +32,6 @@ inquirer.prompt ([
           break;
         case "View Employees":
           viewEmployees();
-          break;
-        case "View Employees By Manager":
-          viewByManager();
           break;
         case "Add Department":
           addDept();
